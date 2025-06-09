@@ -144,7 +144,7 @@
       }
       
       /* Chat popup container */
-      .chat-popup {
+      /* .chat-popup {
         position: fixed;
         bottom: 0;
         right: 20px;
@@ -156,7 +156,7 @@
         overflow: hidden;
         z-index: 999;
         display: none; /* Hidden by default */
-      }
+      /* }  */
       
       .chat-popup-header {
         background-color: var(--header-bg);
@@ -220,21 +220,21 @@
     <button class="mode-toggle" onclick="toggleDarkMode()">Toggle Dark/Light Mode</button>
     
     <!-- Facebook-like chat tab -->
-    <div class="chat-tab" onclick="toggleChat()">
+    <!-- <div class="chat-tab" onclick="toggleChat()">
         <span id="chat-tab-text">Chat with Church AI</span>
-    </div>
+    </div> -->
     
     <!-- Chat popup -->
     <div class="chat-popup" id="chat-popup">
-        <div class="chat-popup-header">
-            <span>Church AI Assistant</span>
-            <button class="close-button" onclick="toggleChat()">×</button>
+        <!-- <div class="chat-popup-header"> -->
+            <!-- <span>Church AI Assistant</span>
+            <button class="close-button" onclick="toggleChat()">×</button> -->
         </div>
-        <div class="chat-popup-content" id="popup-chat-container"></div>
+        <!-- <div class="chat-popup-content" id="popup-chat-container"></div>
         <div class="chat-popup-input">
             <input type="text" id="popup-user-input" placeholder="Type your message here..." aria-label="Your message">
             <button id="popup-send-button">Send</button>
-        </div>
+        </div> -->
     </div>
    
     <!-- Custom script for handling the chat -->
@@ -256,18 +256,18 @@
       }
       
       // Toggle chat popup
-      function toggleChat() {
-        const chatPopup = document.getElementById('chat-popup');
-        if (chatPopup.style.display === 'block') {
-          chatPopup.style.display = 'none';
-          document.getElementById('chat-tab-text').textContent = 'Chat with Church AI';
-        } else {
-          chatPopup.style.display = 'block';
-          document.getElementById('chat-tab-text').textContent = 'Church AI';
-          // Focus on input field
-          document.getElementById('popup-user-input').focus();
-        }
-      }
+      // function toggleChat() {
+      //   const chatPopup = document.getElementById('chat-popup');
+      //   if (chatPopup.style.display === 'block') {
+      //     chatPopup.style.display = 'none';
+      //     // document.getElementById('chat-tab-text').textContent = 'Chat with Church AI';
+      //   } else {
+      //     chatPopup.style.display = 'block';
+      //     // document.getElementById('chat-tab-text').textContent = 'Church AI';
+      //     // Focus on input field
+      //     document.getElementById('popup-user-input').focus();
+      //   }
+      // }
       
       // Function to set up the message sending functionality
       function setupMessageSending() {
@@ -275,7 +275,7 @@
         const popupSendButton = document.getElementById('popup-send-button');
         
         // Function to send message to Botpress
-        function sendMessage() {
+        function sendMessage() {sendMessage
           const message = popupUserInput.value.trim();
           if (message) {
             try {
@@ -291,14 +291,14 @@
         }
         
         // Send message when button is clicked
-        popupSendButton.addEventListener('click', sendMessage);
-        
+        // popupSendButton.addEventListener('click', sendMessage);
+        // 
         // Send message when Enter key is pressed
-        popupUserInput.addEventListener('keypress', function(e) {
-          if (e.key === 'Enter') {
-            sendMessage();
-          }
-        });
+        // popupUserInput.addEventListener('keypress', function(e) {
+        //   if (e.key === 'Enter') {
+        //     sendMessage();
+        //   }
+        // });
       }
       
       // Initialize Botpress
@@ -332,7 +332,7 @@
             "termsOfService": {},
             "privacyPolicy": {}
           },
-          "selector": "#popup-chat-container"
+          "selector": "#chat-popup"
         });
         
         // Try to set up event listener for when webchat is ready
@@ -340,7 +340,7 @@
           console.log("Botpress webchat is ready");
           setupMessageSending();
           // Open the webchat
-          window.botpress.open();
+          // window.botpress.open();
         });
         
         // Fallback: If the event doesn't trigger, set up message sending after a delay
