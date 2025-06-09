@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Church AI Chat</title>
+   
+    <!-- CSS file -->
+    <!-- <link rel="stylesheet" href="styles.css"> -->
+    
+    <style>
+      /* Basic styles */
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: Arial, sans-serif;
+        transition: background-color 0.3s, color 0.3s;
+      }
+      
+      /* Light mode (default) */
+      :root {
+        --bg-color: #f5f5f5;
+        --text-color: #333;
+        --header-bg: #673AB7;
+        --header-text: white;
+        --chat-bg: white;
+        --input-bg: white;
+        --input-border: #ddd;
+        --button-bg: #673AB7;
+        --button-text: white;
+        --chat-tab-bg: #673AB7;
+      }
+      
+      /* Dark mode */
+      .dark-mode {
+        --bg-color: #222;
+        --text-color: #eee;
+        --header-bg: #4527A0;
+        --header-text: white;
+        --chat-bg: #333;
+        --input-bg: #444;
+        --input-border: #555;
+        --button-bg: #4527A0;
+        --button-text: white;
+        --chat-tab-bg: #4527A0;
+      }
+      
+      body {
+        background-color: var(--bg-color);
+        color: var(--text-color);
+      }
+      
+      .header {
+        background-color: var(--header-bg);
+        color: var(--header-text);
+        padding: 20px;
+        text-align: center;
+      }
+      
+      /* Chat container styles */
+      #chat-container {
+        background-color: var(--chat-bg);
+        height: 400px;
+        margin: 20px auto;
+        max-width: 800px;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        overflow: hidden;
+      }
+      
+      #chat-container .bpWebchat {
+        position: unset;
+        width: 100%;
+        height: 100%;
+        max-height: 100%;
+        max-width: 100%;
+      }
+      
+      #chat-container .bpFab {
+        display: none;
+      }
+      
+      /* Hide the Botpress input field since we'll use our own */
+      #chat-container .bpw-composer {
+        display: none !important;
+      }
+      
+      /* Custom input container */
+      .input-container {
+        display: flex;
+        margin: 0 auto 20px;
+        max-width: 800px;
+        padding: 10px;
+        background-color: var(--input-bg);
+        border: 1px solid var(--input-border);
+        border-radius: 10px;
+      }
+      
+      #user-input {
+        flex: 1;
+        padding: 10px;
+        border: none;
+        border-radius: 5px;
+        background-color: var(--input-bg);
+        color: var(--text-color);
+      }
+      
+      #send-button {
+        padding: 10px 20px;
+        margin-left: 10px;
+        background-color: var(--button-bg);
+        color: var(--button-text);
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+      
+      /* Mode toggle button */
+      .mode-toggle {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 10px;
+        background-color: var(--button-bg);
+        color: var(--button-text);
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        z-index: 1000;
+      }
+      
+      /* Facebook-like chat tab */
+      .chat-tab {
+        position: fixed;
+        bottom: 0;
+        right: 20px;
+        background-color: var(--chat-tab-bg);
+        color: white;
+        padding: 10px 20px;
+        border-radius: 10px 10px 0 0;
+        cursor: pointer;
+        z-index: 1000;
+        box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+      }
+      
+      /* Chat popup container */
+      .chat-popup {
+        position: fixed;
+        bottom: 0;
+        right: 20px;
+        width: 350px;
+        height: 450px;
+        background-color: var(--chat-bg);
+        border-radius: 10px 10px 0 0;
+        box-shadow: 0 -2px 10px rgba(0,0,0,0.2);
+        overflow: hidden;
+        z-index: 999;
+        display: none; /* Hidden by default */
+      }
+      
+      .chat-popup-header {
+        background-color: var(--header-bg);
+        color: white;
+        padding: 10px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      
+      .chat-popup-content {
+        height: calc(100% - 110px);
+        overflow: hidden;
+      }
+      
+      .chat-popup-input {
+        display: flex;
+        padding: 10px;
+        border-top: 1px solid var(--input-border);
+      }
+      
+      .chat-popup-input input {
+        flex: 1;
+        padding: 8px;
+        border: 1px solid var(--input-border);
+        border-radius: 20px;
+        background-color: var(--input-bg);
+        color: var(--text-color);
+      }
+      
+      .chat-popup-input button {
+        margin-left: 10px;
+        padding: 8px 15px;
+        background-color: var(--button-bg);
+        color: white;
+        border: none;
+        border-radius: 20px;
+        cursor: pointer;
+      }
+      
+      .close-button {
+        background: none;
+        border: none;
+        color: white;
+        font-size: 18px;
+        cursor: pointer;
+      }
+    </style>
+    
+    <!-- Botpress Webchat Script -->
+    <script src="https://cdn.botpress.cloud/webchat/v3.0/inject.js"></script>
+</head>
+
+<body>
+    <div class="header">
+        <h1>Church AI Chat</h1>
+        <p>Magtanong tungkol sa Bible, simbahan, at iba pa</p>
+    </div>
+    
+    <!-- Mode toggle button -->
+    <button class="mode-toggle" onclick="toggleDarkMode()">Toggle Dark/Light Mode</button>
+    
+    <!-- Facebook-like chat tab -->
+    <div class="chat-tab" onclick="toggleChat()">
+        <span id="chat-tab-text">Chat with Church AI</span>
+    </div>
+    
+    <!-- Chat popup -->
+    <div class="chat-popup" id="chat-popup">
+        <div class="chat-popup-header">
+            <span>Church AI Assistant</span>
+            <button class="close-button" onclick="toggleChat()">×</button>
+        </div>
+        <div class="chat-popup-content" id="popup-chat-container"></div>
+        <div class="chat-popup-input">
+            <input type="text" id="popup-user-input" placeholder="Type your message here..." aria-label="Your message">
+            <button id="popup-send-button">Send</button>
+        </div>
+    </div>
+   
+    <!-- Custom script for handling the chat -->
+    <script>
+      // Dark mode toggle
+      function toggleDarkMode() {
+        document.body.classList.toggle('dark-mode');
+        // Save preference to localStorage
+        if (document.body.classList.contains('dark-mode')) {
+          localStorage.setItem('darkMode', 'enabled');
+        } else {
+          localStorage.setItem('darkMode', 'disabled');
+        }
+      }
+      
+      // Check for saved dark mode preference
+      if (localStorage.getItem('darkMode') === 'enabled') {
+        document.body.classList.add('dark-mode');
+      }
+      
+      // Toggle chat popup
+      function toggleChat() {
+        const chatPopup = document.getElementById('chat-popup');
+        if (chatPopup.style.display === 'block') {
+          chatPopup.style.display = 'none';
+          document.getElementById('chat-tab-text').textContent = 'Chat with Church AI';
+        } else {
+          chatPopup.style.display = 'block';
+          document.getElementById('chat-tab-text').textContent = 'Church AI';
+          // Focus on input field
+          document.getElementById('popup-user-input').focus();
+        }
+      }
+      
+      // Function to set up the message sending functionality
+      function setupMessageSending() {
+        const popupUserInput = document.getElementById('popup-user-input');
+        const popupSendButton = document.getElementById('popup-send-button');
+        
+        // Function to send message to Botpress
+        function sendMessage() {
+          const message = popupUserInput.value.trim();
+          if (message) {
+            try {
+              // Send message to Botpress
+              window.botpress.sendMessage(message);
+              console.log("Message sent: " + message);
+              // Clear input field
+              popupUserInput.value = '';
+            } catch (error) {
+              console.error("Error sending message:", error);
+            }
+          }
+        }
+        
+        // Send message when button is clicked
+        popupSendButton.addEventListener('click', sendMessage);
+        
+        // Send message when Enter key is pressed
+        popupUserInput.addEventListener('keypress', function(e) {
+          if (e.key === 'Enter') {
+            sendMessage();
+          }
+        });
+      }
+      
+      // Initialize Botpress
+      document.addEventListener('DOMContentLoaded', function() {
+        console.log("DOM loaded, initializing Botpress...");
+        
+        // Initialize Botpress with custom configuration
+        window.botpress.init({
+          "botId": "3b06e089-17f3-4c73-9dc3-8da2f4ee5705",
+          "clientId": "c9948b3e-3419-4eee-9d17-cd94faf8307e",
+          "configuration": {
+            // Custom color theme
+            "color": "#673AB7", // Purple color
+            
+            // Bot name and avatar
+            "botName": "Church AI Assistant",
+            "avatarUrl": "https://example.com/your-logo.png", // Replace with your logo URL
+            
+            // Theme variant and mode
+            "variant": "default", 
+            "themeMode": "light", // This will change based on the site's dark/light mode
+            
+            // Conversation settings
+            "conversationTimeoutLimit": 900000, // 15 minutes in milliseconds
+            "enableConversationDeletion": true,
+            
+            // Other settings
+            "website": {},
+            "email": {},
+            "phone": {},
+            "termsOfService": {},
+            "privacyPolicy": {}
+          },
+          "selector": "#popup-chat-container"
+        });
+        
+        // Try to set up event listener for when webchat is ready
+        window.botpress.on("webchat:ready", () => {
+          console.log("Botpress webchat is ready");
+          setupMessageSending();
+          // Open the webchat
+          window.botpress.open();
+        });
+        
+        // Fallback: If the event doesn't trigger, set up message sending after a delay
+        setTimeout(function() {
+          console.log("Setting up message sending (from timeout)");
+          if (window.botpress && window.botpress.sendMessage) {
+            setupMessageSending();
+          } else {
+            console.error("Botpress is not properly initialized after timeout");
+          }
+        }, 3000); // 3 second delay
+      });
+      
+      // Update Botpress theme when dark mode changes
+      const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+          if (mutation.attributeName === "class") {
+            const isDarkMode = document.body.classList.contains('dark-mode');
+            if (window.botpress && window.botpress.updateConfig) {
+              window.botpress.updateConfig({
+                themeMode: isDarkMode ? 'dark' : 'light'
+              });
+            }
+          }
+        });
+      });
+      
+      observer.observe(document.body, { attributes: true });
+    </script>
+</body>
+</html>
